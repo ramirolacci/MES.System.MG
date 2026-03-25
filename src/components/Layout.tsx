@@ -28,8 +28,8 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0f1115] transition-colors duration-300">
+      <nav className="bg-white dark:bg-[#1a1c23] shadow-sm border-b border-gray-200 dark:border-white/5 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
@@ -37,8 +37,8 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
                 <Factory className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Sistema MES</h1>
-                <p className="text-xs text-gray-500">Gestión de Producción</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">Sistema MES</h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Gestión de Producción</p>
               </div>
             </div>
 
@@ -50,10 +50,10 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
                   <button
                     key={item.id}
                     onClick={() => onNavigate(item.id)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition ${
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${
                       isActive
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -65,7 +65,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
 
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-300"
             >
               {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -73,7 +73,7 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
         </div>
 
         {menuOpen && (
-          <div className="md:hidden border-t border-gray-200 bg-white">
+          <div className="md:hidden border-t border-gray-200 dark:border-white/5 bg-white dark:bg-[#1a1c23]">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {menuItems.map((item) => {
                 const Icon = item.icon;
@@ -85,10 +85,10 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
                       onNavigate(item.id);
                       setMenuOpen(false);
                     }}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition ${
+                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all ${
                       isActive
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5'
                     }`}
                   >
                     <Icon className="w-5 h-5" />

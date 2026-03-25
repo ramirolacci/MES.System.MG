@@ -42,12 +42,12 @@ export function ProgrammingPage() {
   const loadProgramming = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('programming')
+      const { data, error } = await (supabase
+        .from('programming') as any)
         .select('*')
         .eq('date', selectedDate)
         .eq('sector', selectedSector)
-        .order('product', { ascending: true });
+        .order('product', { ascending: true }) as { data: any[] | null; error: any };
 
       if (error) throw error;
       if (!data || data.length === 0) {
@@ -56,7 +56,7 @@ export function ProgrammingPage() {
       }
 
       const dataByKey = new Map(
-        data.map((row) => [programmingKey(row.product, (row.shift_type ?? 'Mañana') as ShiftType), row])
+        (data as any[]).map((row) => [programmingKey(row.product, (row.shift_type ?? 'Mañana') as ShiftType), row])
       );
 
       const rows = buildDefaultRows(selectedDate, selectedSector).map((defaultRow) => {
@@ -65,7 +65,7 @@ export function ProgrammingPage() {
         return existing ?? defaultRow;
       });
 
-      setProgramming(rows);
+      setProgramming(rows as Programming[]);
     } catch (error) {
       console.error('Error loading programming:', error);
       showMessage('error', 'Error al cargar la programación');
@@ -86,8 +86,8 @@ export function ProgrammingPage() {
   const saveProgramming = async () => {
     setSaving(true);
     try {
-      const { error: deleteError } = await supabase
-        .from('programming')
+      const { error: deleteError } = await (supabase
+        .from('programming') as any)
         .delete()
         .eq('date', selectedDate)
         .eq('sector', selectedSector);
@@ -102,8 +102,8 @@ export function ProgrammingPage() {
         planned_kg: Number.isFinite(p.planned_kg) ? p.planned_kg : 0,
       }));
 
-      const { error: insertError } = await supabase
-        .from('programming')
+      const { error: insertError } = await (supabase
+        .from('programming') as any)
         .insert(dataToInsert);
 
       if (insertError) throw insertError;
@@ -141,7 +141,7 @@ export function ProgrammingPage() {
       }
 
       const dataByKey = new Map(
-        data.map((row) => [programmingKey(row.product, (row.shift_type ?? 'Mañana') as ShiftType), row])
+        (data as any[]).map((row) => [programmingKey(row.product, (row.shift_type ?? 'Mañana') as ShiftType), row])
       );
 
       const copiedData = buildDefaultRows(selectedDate, selectedSector).map((row) => {
@@ -151,7 +151,7 @@ export function ProgrammingPage() {
 
         return {
           ...row,
-          planned_kg: existing.planned_kg,
+          planned_kg: (existing as any).planned_kg,
         };
       });
 
@@ -181,16 +181,16 @@ export function ProgrammingPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Programación Diaria</h1>
-          <p className="text-gray-600 mt-1">Gestiona el plan de producción</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Programación Diaria</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">Gestiona el plan de producción</p>
         </div>
       <div className="flex flex-wrap items-center gap-2">
-          <Calendar className="w-5 h-5 text-gray-500" />
+          <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
           />
           <button
             onClick={saveProgramming}
@@ -208,10 +208,10 @@ export function ProgrammingPage() {
           <button
             key={sector}
             onClick={() => setSelectedSector(sector)}
-            className={`px-4 py-2 rounded-lg font-medium transition ${
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
               selectedSector === sector
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                ? 'bg-blue-600 dark:bg-blue-600 text-white shadow-md'
+                : 'bg-white dark:bg-[#1a1c23] text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5'
             }`}
           >
             {sector}
@@ -224,10 +224,10 @@ export function ProgrammingPage() {
           <button
             key={shift}
             onClick={() => setSelectedShift(shift)}
-            className={`px-4 py-2 rounded-lg font-medium transition ${
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
               selectedShift === shift
-                ? 'bg-amber-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                ? 'bg-amber-600 dark:bg-amber-600 text-white shadow-md'
+                : 'bg-white dark:bg-[#1a1c23] text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5'
             }`}
           >
             Turno {shift}
@@ -254,24 +254,24 @@ export function ProgrammingPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 overflow-hidden transition-all duration-300">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-black/20 border-b border-gray-200 dark:border-white/5">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Producto</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Turno</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Planificado (kg)</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Producto</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Turno</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Planificado (kg)</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 dark:divide-white/5">
               {visibleProgramming.map((row) => (
-                <tr key={row.id} className="hover:bg-gray-50">
+                <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors">
                   <td className="px-6 py-4">
-                    <span className="font-medium text-gray-900">{row.product}</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{row.product}</span>
                   </td>
                   <td className="px-6 py-4">
-                    <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+                    <span className="inline-flex px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-white/10">
                       {row.shift_type ?? 'Mañana'}
                     </span>
                   </td>
@@ -286,14 +286,14 @@ export function ProgrammingPage() {
                       )}
                       min="0"
                       step="0.1"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                   </td>
                 </tr>
               ))}
               {visibleProgramming.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={3} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400 font-medium italic">
                     No hay programación cargada para el turno seleccionado
                   </td>
                 </tr>

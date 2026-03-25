@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Production, SECTORS, Sector, calculateDifference, calculateStatus, getStatusColor } from '../types';
+import { Production, SECTORS, Sector, calculateDifference, calculateStatus } from '../types';
 import { Calendar, PlayCircle, Save, StopCircle, Sun, Sunset } from 'lucide-react';
 
 export function ProductionPage() {
@@ -18,8 +18,8 @@ export function ProductionPage() {
   const loadProduction = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('production')
+      const { data, error } = await (supabase
+        .from('production') as any)
         .select('*')
         .eq('date', selectedDate)
         .eq('sector', selectedSector)
@@ -53,8 +53,8 @@ export function ProductionPage() {
       }));
 
       for (const update of updates) {
-        const { error } = await supabase
-          .from('production')
+        const { error } = await (supabase
+          .from('production') as any)
           .update({ produced: update.produced })
           .eq('id', update.id);
 
@@ -89,8 +89,8 @@ export function ProductionPage() {
         };
       });
 
-      const { error } = await supabase
-        .from('shifts')
+      const { error } = await (supabase
+        .from('shifts') as any)
         .insert(shiftData);
 
       if (error) throw error;
@@ -107,8 +107,8 @@ export function ProductionPage() {
   const startDay = async () => {
     setSaving(true);
     try {
-      const { data: existingProduction } = await supabase
-        .from('production')
+      const { data: existingProduction } = await (supabase
+        .from('production') as any)
         .select('id')
         .eq('date', selectedDate)
         .limit(1)
@@ -120,21 +120,21 @@ export function ProductionPage() {
         return;
       }
 
-      const { data: allProgramming, error: programmingError } = await supabase
-        .from('programming')
+      const { data: allProgramming, error: programmingError } = await (supabase
+        .from('programming') as any)
         .select('*')
-        .eq('date', selectedDate);
+        .eq('date', selectedDate) as { data: any[] | null; error: any };
 
       if (programmingError) throw programmingError;
 
-      if (!allProgramming || allProgramming.length === 0) {
+      if (!allProgramming || (allProgramming as any[]).length === 0) {
         showMessage('error', 'No hay programación para iniciar el día');
         setSaving(false);
         return;
       }
 
       const grouped = new Map<string, { sector: string; product: string; planned: number }>();
-      for (const row of allProgramming) {
+      for (const row of (allProgramming as any[])) {
         const key = `${row.sector}||${row.product}`;
         const previous = grouped.get(key);
         if (previous) {
@@ -156,8 +156,8 @@ export function ProductionPage() {
         produced: 0,
       }));
 
-      const { error } = await supabase
-        .from('production')
+      const { error } = await (supabase
+        .from('production') as any)
         .insert(productionData);
 
       if (error) throw error;
@@ -175,8 +175,8 @@ export function ProductionPage() {
   const closeDay = async () => {
     setSaving(true);
     try {
-      const { data: existingHistory } = await supabase
-        .from('history')
+      const { data: existingHistory } = await (supabase
+        .from('history') as any)
         .select('id')
         .eq('date', selectedDate)
         .limit(1)
@@ -188,20 +188,20 @@ export function ProductionPage() {
         return;
       }
 
-      const { data: productionData, error: fetchError } = await supabase
-        .from('production')
+      const { data: productionData, error: fetchError } = await (supabase
+        .from('production') as any)
         .select('*')
-        .eq('date', selectedDate);
+        .eq('date', selectedDate) as { data: any[] | null; error: any };
 
       if (fetchError) throw fetchError;
 
-      if (!productionData || productionData.length === 0) {
+      if (!productionData || (productionData as any[]).length === 0) {
         showMessage('error', 'No hay producción para cerrar');
         setSaving(false);
         return;
       }
 
-      const historyData = productionData.map((p) => ({
+      const historyData = (productionData as any[]).map((p) => ({
         date: p.date,
         sector: p.sector,
         product: p.product,
@@ -212,8 +212,8 @@ export function ProductionPage() {
         shift_type: 'Completo',
       }));
 
-      const { error: insertError } = await supabase
-        .from('history')
+      const { error: insertError } = await (supabase
+        .from('history') as any)
         .insert(historyData);
 
       if (insertError) throw insertError;
@@ -244,17 +244,17 @@ export function ProductionPage() {
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Producción Operativa</h1>
-          <p className="text-gray-600 mt-1">Registra la producción en tiempo real</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Producción Operativa</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">Registra la producción en tiempo real</p>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5 text-gray-500" />
+            <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
         </div>
@@ -273,10 +273,10 @@ export function ProductionPage() {
           <button
             key={sector}
             onClick={() => setSelectedSector(sector)}
-            className={`px-4 py-2 rounded-lg font-medium transition ${
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
               selectedSector === sector
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                ? 'bg-blue-600 dark:bg-blue-600 text-white shadow-md'
+                : 'bg-white dark:bg-[#1a1c23] text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5'
             }`}
           >
             {sector}
@@ -285,26 +285,26 @@ export function ProductionPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-600 mb-1">Plan del Sector</p>
-          <p className="text-2xl font-bold text-gray-900">{totalPlanned.toFixed(0)} kg</p>
+        <div className="bg-white dark:bg-[#1a1c23] rounded-xl shadow-sm border border-gray-200 dark:border-white/5 p-4 transition-all duration-300">
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Plan del Sector</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalPlanned.toFixed(0)} kg</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-600 mb-1">Producido</p>
-          <p className="text-2xl font-bold text-gray-900">{totalProduced.toFixed(0)} kg</p>
+        <div className="bg-white dark:bg-[#1a1c23] rounded-xl shadow-sm border border-gray-200 dark:border-white/5 p-4 transition-all duration-300">
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Producido</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{totalProduced.toFixed(0)} kg</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-600 mb-1">Diferencia</p>
+        <div className="bg-white dark:bg-[#1a1c23] rounded-xl shadow-sm border border-gray-200 dark:border-white/5 p-4 transition-all duration-300">
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Diferencia</p>
           <p className={`text-2xl font-bold ${
-            totalDifference > 0 ? 'text-green-600' : totalDifference < 0 ? 'text-red-600' : 'text-gray-900'
+            totalDifference > 0 ? 'text-green-600 dark:text-green-400' : totalDifference < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'
           }`}>
             {totalDifference >= 0 ? '+' : ''}{totalDifference.toFixed(0)} kg
           </p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-          <p className="text-sm font-medium text-gray-600 mb-1">Estado</p>
+        <div className="bg-white dark:bg-[#1a1c23] rounded-xl shadow-sm border border-gray-200 dark:border-white/5 p-4 transition-all duration-300">
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Estado</p>
           <p className={`text-2xl font-bold ${
-            overallStatus === 'Adelanto' ? 'text-amber-600' : overallStatus === 'Atraso' ? 'text-red-600' : 'text-green-600'
+            overallStatus === 'Adelanto' ? 'text-amber-600 dark:text-amber-400' : overallStatus === 'Atraso' ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
           }`}>
             {overallStatus}
           </p>
@@ -354,31 +354,30 @@ export function ProductionPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 overflow-hidden transition-all duration-300">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 dark:bg-black/20 border-b border-gray-200 dark:border-white/5">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Producto</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Planificado (kg)</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Producido (kg)</th>
-                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Diferencia</th>
-                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Estado</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Producto</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Planificado (kg)</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Producido (kg)</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Diferencia</th>
+                <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Estado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 dark:divide-white/5">
               {production.map((row) => {
                 const difference = calculateDifference(row.produced, row.planned);
                 const status = calculateStatus(difference);
-                const statusColor = getStatusColor(status);
 
                 return (
-                  <tr key={row.id} className={`hover:bg-gray-50 ${statusColor}`}>
+                  <tr key={row.id} className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors border-b border-gray-200 dark:border-white/5 last:border-0">
                     <td className="px-6 py-4">
-                      <p className="font-semibold text-gray-900 text-lg">{row.product}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">{row.product}</p>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <p className="text-lg font-medium text-gray-900">{row.planned.toFixed(1)}</p>
+                      <p className="text-lg font-medium text-gray-900 dark:text-white">{row.planned.toFixed(1)}</p>
                     </td>
                     <td className="px-6 py-4">
                       <input
@@ -387,21 +386,21 @@ export function ProductionPage() {
                         onChange={(e) => updateProduced(row.id, parseFloat(e.target.value) || 0)}
                         min="0"
                         step="0.1"
-                        className="w-full px-4 py-3 text-lg font-medium text-right border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 text-base font-bold text-right bg-white dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <p className={`text-lg font-bold ${
-                        difference > 0 ? 'text-green-600' : difference < 0 ? 'text-red-600' : 'text-gray-900'
+                      <p className={`text-base font-black ${
+                        difference > 0 ? 'text-green-600 dark:text-green-400' : difference < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'
                       }`}>
                         {difference >= 0 ? '+' : ''}{difference.toFixed(1)}
                       </p>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex px-4 py-2 rounded-full text-sm font-bold ${
-                        status === 'Adelanto' ? 'bg-amber-500 text-white' :
-                        status === 'Atraso' ? 'bg-red-500 text-white' :
-                        'bg-green-500 text-white'
+                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-bold ${
+                        status === 'Adelanto' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30' :
+                        status === 'Atraso' ? 'bg-red-100 dark:bg-red-500/20 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-500/30' :
+                        'bg-green-100 dark:bg-green-500/20 text-green-800 dark:text-green-400 border border-green-200 dark:border-green-500/30'
                       }`}>
                         {status}
                       </span>
@@ -411,7 +410,7 @@ export function ProductionPage() {
               })}
               {production.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400 font-medium italic">
                     No hay datos de producción para este sector. Inicia el día desde Producción.
                   </td>
                 </tr>
