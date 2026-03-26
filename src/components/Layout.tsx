@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  Factory,
   Menu,
   X,
   Calendar,
@@ -33,9 +32,9 @@ export function Layout({ children, currentPage, onNavigate }: LayoutProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-3">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <Factory className="w-6 h-6 text-white" />
-              </div>
+            <div className="flex items-center space-x-3 pr-2">
+              <img src="/logo.png" alt="Logo" className="h-10 w-auto object-contain" />
+            </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">Sistema MES</h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Gestión de Producción</p>

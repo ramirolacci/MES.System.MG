@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Factory } from 'lucide-react';
 
 export function Login() {
   const [email, setEmail] = useState('');
@@ -34,9 +33,7 @@ export function Login() {
     <div className="min-h-screen bg-gradient-to-br from-[#0f1115] via-[#1a1c23] to-[#0f1115] flex items-center justify-center p-4 transition-all duration-500">
       <div className="bg-white dark:bg-[#1a1c23] backdrop-blur-xl border border-white/5 rounded-3xl shadow-2xl w-full max-w-md p-10 transition-all duration-300">
         <div className="flex items-center justify-center mb-8">
-          <div className="bg-blue-600 p-4 rounded-xl">
-            <Factory className="w-12 h-12 text-white" />
-          </div>
+          <img src="/logo.png" alt="Logo" className="h-20 w-auto object-contain" />
         </div>
 
         <h1 className="text-4xl font-black text-center text-gray-900 dark:text-white mb-2 tracking-tight">
