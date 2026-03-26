@@ -184,18 +184,20 @@ export function ProgrammingPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Programación Diaria</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">Gestiona el plan de producción</p>
         </div>
-      <div className="flex flex-wrap items-center gap-2">
-          <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-          />
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2 flex-1 sm:flex-initial min-w-0">
+            <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="w-full sm:w-auto px-2 sm:px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
+            />
+          </div>
           <button
             onClick={saveProgramming}
             disabled={saving || programming.length === 0}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium disabled:opacity-50"
+            className="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium disabled:opacity-50 shrink-0 text-sm sm:text-base"
           >
             <Save className="w-5 h-5" />
             <span>Guardar Todo</span>
