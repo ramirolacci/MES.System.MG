@@ -14,30 +14,30 @@ export function ProgrammingPage() {
 
   useEffect(() => {
     loadProgramming();
-  }, [selectedDate, selectedSector]);
+  }, [selectedDate]);
 
-  const buildDefaultRows = (date: string, sector: Sector) => {
-    const products = SECTOR_PRODUCTS[sector];
+  const buildAllDefaultRows = (date: string) => {
     const rows: Programming[] = [];
-
-    products.forEach((product) => {
-      SHIFT_TYPES.forEach((shiftType) => {
-        rows.push({
-          id: `temp-${date}-${sector}-${product}-${shiftType}`,
-          date,
-          sector,
-          product,
-          shift_type: shiftType,
-          planned_kg: 0,
-          created_at: new Date().toISOString(),
+    SECTORS.forEach((sector) => {
+      const products = SECTOR_PRODUCTS[sector as Sector];
+      products.forEach((product) => {
+        SHIFT_TYPES.forEach((shiftType) => {
+          rows.push({
+            id: `temp-${date}-${sector}-${product}-${shiftType}`,
+            date,
+            sector: sector as Sector,
+            product,
+            shift_type: shiftType,
+            planned_kg: 0,
+            created_at: new Date().toISOString(),
+          });
         });
       });
     });
-
     return rows;
   };
 
-  const programmingKey = (product: string, shiftType: ShiftType) => `${product}||${shiftType}`;
+  const programmingKey = (sector: string, product: string, shiftType: ShiftType) => `${sector}||${product}||${shiftType}`;
 
   const loadProgramming = async () => {
     setLoading(true);
@@ -46,21 +46,23 @@ export function ProgrammingPage() {
         .from('programming') as any)
         .select('*')
         .eq('date', selectedDate)
-        .eq('sector', selectedSector)
         .order('product', { ascending: true }) as { data: any[] | null; error: any };
 
       if (error) throw error;
+      
+      const defaultRows = buildAllDefaultRows(selectedDate);
+      
       if (!data || data.length === 0) {
-        setProgramming(buildDefaultRows(selectedDate, selectedSector));
+        setProgramming(defaultRows);
         return;
       }
 
       const dataByKey = new Map(
-        (data as any[]).map((row) => [programmingKey(row.product, (row.shift_type ?? 'Mañana') as ShiftType), row])
+        (data as any[]).map((row) => [programmingKey(row.sector, row.product, (row.shift_type ?? 'Mañana') as ShiftType), row])
       );
 
-      const rows = buildDefaultRows(selectedDate, selectedSector).map((defaultRow) => {
-        const key = programmingKey(defaultRow.product, (defaultRow.shift_type ?? 'Mañana') as ShiftType);
+      const rows = defaultRows.map((defaultRow) => {
+        const key = programmingKey(defaultRow.sector, defaultRow.product, (defaultRow.shift_type ?? 'Mañana') as ShiftType);
         const existing = dataByKey.get(key);
         return existing ?? defaultRow;
       });
@@ -89,26 +91,29 @@ export function ProgrammingPage() {
       const { error: deleteError } = await (supabase
         .from('programming') as any)
         .delete()
-        .eq('date', selectedDate)
-        .eq('sector', selectedSector);
+        .eq('date', selectedDate);
 
       if (deleteError) throw deleteError;
 
-      const dataToInsert = programming.map(p => ({
-        date: selectedDate,
-        sector: selectedSector,
-        product: p.product,
-        shift_type: p.shift_type ?? 'Mañana',
-        planned_kg: Number.isFinite(p.planned_kg) ? p.planned_kg : 0,
-      }));
+      const dataToInsert = programming
+        .filter(p => p.planned_kg > 0) // Only save rows with actual values to save space, but optional
+        .map(p => ({
+          date: selectedDate,
+          sector: p.sector,
+          product: p.product,
+          shift_type: p.shift_type ?? 'Mañana',
+          planned_kg: Number.isFinite(p.planned_kg) ? p.planned_kg : 0,
+        }));
 
-      const { error: insertError } = await (supabase
-        .from('programming') as any)
-        .insert(dataToInsert);
+      if (dataToInsert.length > 0) {
+        const { error: insertError } = await (supabase
+          .from('programming') as any)
+          .insert(dataToInsert);
 
-      if (insertError) throw insertError;
+        if (insertError) throw insertError;
+      }
 
-      showMessage('success', `Programación guardada para ${selectedSector}`);
+      showMessage('success', `Programación guardada correctamente`);
       await loadProgramming();
     } catch (error) {
       console.error('Error saving programming:', error);
@@ -128,24 +133,23 @@ export function ProgrammingPage() {
       const { data, error } = await supabase
         .from('programming')
         .select('*')
-        .eq('date', prevDateStr)
-        .eq('sector', selectedSector);
+        .eq('date', prevDateStr);
 
       if (error) throw error;
 
       if (!data || data.length === 0) {
-        showMessage('error', `No hay programación del día anterior en ${selectedSector}`);
-        setProgramming(buildDefaultRows(selectedDate, selectedSector));
+        showMessage('error', `No hay programación del día anterior`);
+        setProgramming(buildAllDefaultRows(selectedDate));
         setLoading(false);
         return;
       }
 
       const dataByKey = new Map(
-        (data as any[]).map((row) => [programmingKey(row.product, (row.shift_type ?? 'Mañana') as ShiftType), row])
+        (data as any[]).map((row) => [programmingKey(row.sector, row.product, (row.shift_type ?? 'Mañana') as ShiftType), row])
       );
 
-      const copiedData = buildDefaultRows(selectedDate, selectedSector).map((row) => {
-        const key = programmingKey(row.product, (row.shift_type ?? 'Mañana') as ShiftType);
+      const copiedData = buildAllDefaultRows(selectedDate).map((row) => {
+        const key = programmingKey(row.sector, row.product, (row.shift_type ?? 'Mañana') as ShiftType);
         const existing = dataByKey.get(key);
         if (!existing) return row;
 
@@ -156,7 +160,7 @@ export function ProgrammingPage() {
       });
 
       setProgramming(copiedData);
-      showMessage('success', `Copiada programación de ${selectedSector} del día anterior`);
+      showMessage('success', `Copiada programación del día anterior`);
     } catch (error) {
       console.error('Error copying from previous day:', error);
       showMessage('error', 'Error al copiar del día anterior');
@@ -174,7 +178,9 @@ export function ProgrammingPage() {
   }
 
   const visibleProgramming = programming.filter(
-    (row) => (row.shift_type ?? 'Mañana') === selectedShift
+    (row) => 
+      row.sector === selectedSector && 
+      (row.shift_type ?? 'Mañana') === selectedShift
   );
 
   return (
