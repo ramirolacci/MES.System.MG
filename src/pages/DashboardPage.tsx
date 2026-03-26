@@ -1,7 +1,140 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Production } from '../types';
-import { TrendingUp, TrendingDown, Target, Package, Calendar } from 'lucide-react';
+import { Calendar } from 'lucide-react';
+
+function CountUpNumber({ end, duration = 1500, decimals = 0, suffix = '', prefix = '' }: { end: number, duration?: number, decimals?: number, suffix?: string, prefix?: string }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let startTime: number | null = null;
+    const startValue = 0;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      // Easing function: easeOutExpo
+      const easing = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      setCount(easing * (end - startValue) + startValue);
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [end, duration]);
+
+  return (
+    <span>
+      {prefix}
+      {count.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
+      {suffix}
+    </span>
+  );
+}
+
+function CircularProgress({ percentage, color = 'blue', size = 52, strokeWidth = 4 }: { percentage: number, color?: string, size?: number, strokeWidth?: number }) {
+  const [progress, setProgress] = useState(0);
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  
+  useEffect(() => {
+    let startTime: number | null = null;
+    const duration = 1500;
+    
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progressTime = Math.min((timestamp - startTime) / duration, 1);
+      const easing = progressTime === 1 ? 1 : 1 - Math.pow(2, -10 * progressTime);
+      setProgress(easing * percentage);
+      if (progressTime < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  }, [percentage]);
+
+  const offset = circumference - (Math.max(0, Math.min(progress, 100)) / 100) * circumference;
+
+  const colorClasses = {
+    blue: 'text-blue-600 dark:text-blue-400',
+    green: 'text-green-600 dark:text-green-400',
+    red: 'text-red-600 dark:text-red-400',
+    amber: 'text-amber-600 dark:text-amber-400',
+  };
+
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} className="transform -rotate-90 drop-shadow-[0_0_8px_rgba(37,99,235,0.1)]">
+        <circle
+          className="text-gray-100 dark:text-white/5"
+          strokeWidth={strokeWidth}
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx={size / 2}
+          cy={size / 2}
+        />
+        <circle
+          className={`${colorClasses[color as keyof typeof colorClasses] || colorClasses.blue} transition-all duration-100`}
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          stroke="currentColor"
+          fill="transparent"
+          r={radius}
+          cx={size / 2}
+          cy={size / 2}
+        />
+      </svg>
+      <span className="absolute text-[10px] font-bold text-gray-900 dark:text-white">
+        {Math.round(progress)}%
+      </span>
+    </div>
+  );
+}
+
+function ProgressBar({ percentage, color = 'blue' }: { percentage: number, color?: 'green' | 'red' | 'blue' | 'amber' }) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let startTime: number | null = null;
+    const duration = 1500;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progressTime = Math.min((timestamp - startTime) / duration, 1);
+      const easing = progressTime === 1 ? 1 : 1 - Math.pow(2, -10 * progressTime);
+      setProgress(easing * percentage);
+      if (progressTime < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [percentage]);
+
+  const colorClasses = {
+    green: 'bg-green-500 dark:bg-green-600',
+    red: 'bg-red-500 dark:bg-red-600',
+    blue: 'bg-blue-500 dark:bg-blue-600',
+    amber: 'bg-amber-500 dark:bg-amber-600',
+  };
+
+  return (
+    <div className="w-full bg-gray-200 dark:bg-white/10 rounded-full h-3 overflow-hidden shadow-inner">
+      <div
+        className={`h-3 rounded-full ${colorClasses[color] || colorClasses.blue}`}
+        style={{ width: `${Math.min(progress, 100)}%` }}
+      ></div>
+    </div>
+  );
+}
 
 export function DashboardPage() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -82,51 +215,55 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Plan Total</p>
-            <Target className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Plan Total</p>
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                <CountUpNumber end={totalPlanned} />
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">kg</p>
+            </div>
+            <CircularProgress percentage={100} color="blue" />
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalPlanned.toFixed(0)}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">kg</p>
         </div>
 
         <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Producción Total</p>
-            <Package className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Producción Total</p>
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                <CountUpNumber end={totalProduced} />
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">kg</p>
+            </div>
+            <CircularProgress percentage={compliance} color="green" />
           </div>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalProduced.toFixed(0)}</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">kg</p>
         </div>
 
         <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Cumplimiento</p>
-            {compliance >= 100 ? (
-              <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
-            ) : (
-              <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
-            )}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Cumplimiento</p>
+              <h3 className={`text-3xl font-bold mt-1 ${compliance >= 100 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                <CountUpNumber end={compliance} decimals={1} suffix="%" />
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">del plan</p>
+            </div>
+            <CircularProgress percentage={compliance} color={compliance >= 100 ? 'green' : 'red'} />
           </div>
-          <p className={`text-3xl font-bold ${compliance >= 100 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-            {compliance.toFixed(1)}%
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">del plan</p>
         </div>
 
         <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Diferencia</p>
-            {difference >= 0 ? (
-              <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
-            ) : (
-              <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
-            )}
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Diferencia</p>
+              <h3 className={`text-3xl font-bold mt-1 ${difference >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                <CountUpNumber end={difference} prefix={difference >= 0 ? '+' : ''} />
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">kg</p>
+            </div>
+            <CircularProgress percentage={Math.abs(compliance - 100)} color={difference >= 0 ? 'green' : 'amber'} />
           </div>
-          <p className={`text-3xl font-bold ${difference >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-            {difference >= 0 ? '+' : ''}{difference.toFixed(0)}
-          </p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">kg</p>
         </div>
       </div>
 
@@ -143,21 +280,17 @@ export function DashboardPage() {
                     <span className={`text-sm font-semibold ${
                       sectorCompliance >= 100 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                     }`}>
-                      {sectorCompliance.toFixed(0)}%
+                      <CountUpNumber end={sectorCompliance} suffix="%" />
                     </span>
                   </div>
                   <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400 mb-2">
-                    <span>Plan: {data.planned.toFixed(0)} kg</span>
-                    <span>Producido: {data.produced.toFixed(0)} kg</span>
+                    <span>Plan: <CountUpNumber end={data.planned} /> kg</span>
+                    <span>Producido: <CountUpNumber end={data.produced} /> kg</span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-white/10 rounded-full h-3">
-                    <div
-                      className={`h-3 rounded-full transition-all ${
-                        sectorCompliance >= 100 ? 'bg-green-500 dark:bg-green-600' : 'bg-red-500 dark:bg-red-600'
-                      }`}
-                      style={{ width: `${Math.min(sectorCompliance, 100)}%` }}
-                    ></div>
-                  </div>
+                  <ProgressBar 
+                    percentage={sectorCompliance} 
+                    color={sectorCompliance >= 100 ? 'green' : 'red'} 
+                  />
                 </div>
               );
             })}
@@ -174,11 +307,13 @@ export function DashboardPage() {
                   <p className="text-sm text-gray-600 dark:text-gray-400">{item.sector}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">{item.produced.toFixed(0)} kg</p>
+                  <p className="text-xl font-bold text-gray-900 dark:text-white">
+                    <CountUpNumber end={item.produced} suffix=" kg" />
+                  </p>
                   <p className={`text-sm font-semibold ${
                     item.compliance >= 100 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                   }`}>
-                    {item.compliance.toFixed(0)}% del plan
+                    <CountUpNumber end={item.compliance} suffix="% del plan" />
                   </p>
                 </div>
               </div>
