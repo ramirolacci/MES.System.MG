@@ -10,14 +10,14 @@ export function HistoryPage() {
     return date.toISOString().split('T')[0];
   });
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
-  const [selectedSector, setSelectedSector] = useState<Sector | 'Todos'>('Todos');
+  const [selectedSector, setSelectedSector] = useState<Sector>(SECTORS[0]);
   const [selectedShift, setSelectedShift] = useState<ShiftType | 'Todos'>('Todos');
   const [history, setHistory] = useState<History[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadHistory();
-  }, [startDate, endDate, selectedSector, selectedShift]);
+  }, [startDate, endDate, selectedShift]);
 
   const loadHistory = async () => {
     setLoading(true);
@@ -30,9 +30,7 @@ export function HistoryPage() {
         .order('date', { ascending: false })
         .order('sector', { ascending: true });
 
-      if (selectedSector !== 'Todos') {
-        query = query.eq('sector', selectedSector);
-      }
+
 
       if (selectedShift !== 'Todos') {
         query = query.eq('shift_type', selectedShift);
@@ -49,7 +47,8 @@ export function HistoryPage() {
     }
   };
 
-  const groupedByDate = history.reduce((acc, item) => {
+  const filteredHistory = history.filter(item => item.sector === selectedSector);
+  const groupedByDate = filteredHistory.reduce((acc, item) => {
     if (!acc[item.date]) {
       acc[item.date] = [];
     }
@@ -107,7 +106,7 @@ export function HistoryPage() {
           <Filter className="w-5 h-5 text-gray-700 dark:text-gray-300" />
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filtros</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               <Calendar className="w-4 h-4 inline mr-1" />
@@ -144,21 +143,6 @@ export function HistoryPage() {
               </div>
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Sector
-            </label>
-            <select
-              value={selectedSector}
-              onChange={(e) => setSelectedSector(e.target.value as Sector | 'Todos')}
-              className="w-full px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            >
-              <option value="Todos">Todos los sectores</option>
-              {SECTORS.map(sector => (
-                <option key={sector} value={sector}>{sector}</option>
-              ))}
-            </select>
-          </div>
         </div>
       </div>
 
@@ -191,6 +175,22 @@ export function HistoryPage() {
                         {items.length} producto{items.length !== 1 ? 's' : ''} registrado{items.length !== 1 ? 's' : ''}
                       </p>
                     </div>
+                    <div className="hidden lg:flex flex-wrap gap-1 bg-black/20 p-1 rounded-xl">
+                      {SECTORS.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setSelectedSector(s)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all uppercase ${
+                            selectedSector === s
+                              ? 'bg-blue-500 text-white shadow-sm'
+                              : 'text-white hover:bg-white/10'
+                          }`}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+
                     <div className="flex flex-wrap gap-4 text-white">
                       <div>
                         <p className="text-blue-100 dark:text-gray-400 text-xs font-medium uppercase tracking-wider">Plan Total</p>

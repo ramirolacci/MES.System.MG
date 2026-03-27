@@ -24,9 +24,7 @@ export function ProductionPage() {
       const { data, error } = await (supabase
         .from('production') as any)
         .select('*')
-        .eq('date', selectedDate)
-        .eq('sector', selectedSector)
-        .order('product', { ascending: true });
+        .eq('date', selectedDate);
 
       if (error) throw error;
       setProduction(data || []);
@@ -44,7 +42,6 @@ export function ProductionPage() {
         .from('programming')
         .select('*')
         .eq('date', selectedDate)
-        .eq('sector', selectedSector)
         .eq('shift_type', selectedShift);
 
       const { data, error } = await (query as any);
@@ -427,7 +424,9 @@ export function ProductionPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-white/5">
-              {production.map((row) => {
+              {production
+                .filter(p => p.sector === selectedSector)
+                .map((row) => {
                 const plannedForView = programmingPlan[row.product] || 0;
                 const difference = calculateDifference(row.produced, plannedForView);
                 const status = calculateStatus(difference);
@@ -469,10 +468,10 @@ export function ProductionPage() {
                   </tr>
                 );
               })}
-              {production.length === 0 && (
+              {production.filter(p => p.sector === selectedSector).length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400 font-medium italic">
-                    No hay datos de producción para este sector. Inicia el día desde Producción.
+                    No hay datos de producción para el sector {selectedSector} en este turno.
                   </td>
                 </tr>
               )}

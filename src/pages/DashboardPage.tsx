@@ -162,8 +162,9 @@ export function DashboardPage() {
     }
   };
 
-  const totalPlanned = production.reduce((sum, p) => sum + p.planned, 0);
-  const totalProduced = production.reduce((sum, p) => sum + p.produced, 0);
+  const armadoProduction = production.filter(p => p.sector === 'Armado');
+  const totalPlanned = armadoProduction.reduce((sum, p) => sum + p.planned, 0);
+  const totalProduced = armadoProduction.reduce((sum, p) => sum + p.produced, 0);
   const compliance = totalPlanned > 0 ? (totalProduced / totalPlanned) * 100 : 0;
   const difference = totalProduced - totalPlanned;
 
@@ -236,7 +237,10 @@ export function DashboardPage() {
         <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Producción Total</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                Producción Total
+                <span className="text-[10px] bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider transition-all duration-300">Armado</span>
+              </p>
               <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
                 <CountUpNumber end={totalProduced} />
               </h3>
