@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { Production, SECTORS, Sector, SHIFT_TYPES, ShiftType, calculateDifference, calculateStatus } from '../types';
 import { Calendar, PlayCircle, Save, StopCircle } from 'lucide-react';
@@ -12,6 +12,7 @@ export function ProductionPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadProduction();
@@ -297,21 +298,20 @@ export function ProductionPage() {
           <p className="text-gray-600 dark:text-gray-400 mt-1 transition-colors duration-300">Registra la producción en tiempo real</p>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-            <div className="relative">
+            <div 
+              className="relative w-full sm:w-auto min-w-[130px] px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white flex items-center justify-between gap-2 text-sm sm:text-base transition-all cursor-pointer hover:border-blue-500 dark:hover:border-blue-500/50 group"
+              onClick={() => dateInputRef.current?.showPicker()}
+            >
               <input
+                ref={dateInputRef}
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full"
+                className="absolute inset-0 opacity-0 w-0 h-0 pointer-events-none"
               />
-              <div className="min-w-[140px] px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white flex items-center justify-between gap-3 transition-all cursor-pointer">
-                <span className="font-medium">{selectedDate.split('-').reverse().join('/')}</span>
-                <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
-              </div>
+              <span>{selectedDate.split('-').reverse().join('/')}</span>
+              <Calendar className="w-4 h-4 text-gray-400 group-hover:text-blue-500 shrink-0 transition-colors" />
             </div>
-          </div>
         </div>
       </div>
 

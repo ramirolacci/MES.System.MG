@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { Programming, SECTOR_PRODUCTS, SECTORS, SHIFT_TYPES, Sector, ShiftType } from '../types';
 import { Calendar, Copy, Save, RefreshCw } from 'lucide-react';
@@ -11,6 +11,7 @@ export function ProgrammingPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadProgramming();
@@ -209,17 +210,19 @@ export function ProgrammingPage() {
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               </button>
             </div>
-            <div className="relative">
+            <div 
+              className="relative w-full sm:w-auto min-w-[130px] px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white flex items-center justify-between gap-2 text-sm sm:text-base transition-all cursor-pointer hover:border-blue-500 dark:hover:border-blue-500/50 group"
+              onClick={() => dateInputRef.current?.showPicker()}
+            >
               <input
+                ref={dateInputRef}
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full"
+                className="absolute inset-0 opacity-0 w-0 h-0 pointer-events-none"
               />
-              <div className="w-full sm:w-auto min-w-[130px] px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white flex items-center justify-between gap-2 text-sm sm:text-base transition-all">
-                <span>{selectedDate.split('-').reverse().join('/')}</span>
-                <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
-              </div>
+              <span>{selectedDate.split('-').reverse().join('/')}</span>
+              <Calendar className="w-4 h-4 text-gray-400 group-hover:text-blue-500 shrink-0 transition-colors" />
             </div>
           </div>
           <button

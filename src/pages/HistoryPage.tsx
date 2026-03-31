@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { History, SECTORS, Sector, SHIFT_TYPES, ShiftType } from '../types';
 import { Calendar, Filter } from 'lucide-react';
@@ -14,6 +14,8 @@ export function HistoryPage() {
   const [selectedShift, setSelectedShift] = useState<ShiftType | 'Todos'>('Todos');
   const [history, setHistory] = useState<History[]>([]);
   const [loading, setLoading] = useState(true);
+  const startInputRef = useRef<HTMLInputElement>(null);
+  const endInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadHistory();
@@ -112,17 +114,19 @@ export function HistoryPage() {
               <Calendar className="w-4 h-4 inline mr-1" />
               Fecha Inicio
             </label>
-            <div className="relative">
+            <div 
+              className="relative w-full px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white flex items-center justify-between gap-3 transition-all cursor-pointer hover:border-blue-500 dark:hover:border-blue-500/50 group text-sm sm:text-base"
+              onClick={() => startInputRef.current?.showPicker()}
+            >
               <input
+                ref={startInputRef}
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full"
+                className="absolute inset-0 opacity-0 w-0 h-0 pointer-events-none"
               />
-              <div className="w-full px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white flex items-center justify-between gap-3 transition-all cursor-pointer">
-                <span className="font-medium">{startDate.split('-').reverse().join('/')}</span>
-                <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
-              </div>
+              <span className="font-medium text-[13px] sm:text-sm">{startDate.split('-').reverse().join('/')}</span>
+              <Calendar className="w-4 h-4 text-gray-400 group-hover:text-blue-500 shrink-0 transition-colors" />
             </div>
           </div>
           <div>
@@ -130,17 +134,19 @@ export function HistoryPage() {
               <Calendar className="w-4 h-4 inline mr-1" />
               Fecha Fin
             </label>
-            <div className="relative">
+            <div 
+              className="relative w-full px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white flex items-center justify-between gap-3 transition-all cursor-pointer hover:border-blue-500 dark:hover:border-blue-500/50 group text-sm sm:text-base"
+              onClick={() => endInputRef.current?.showPicker()}
+            >
               <input
+                ref={endInputRef}
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full"
+                className="absolute inset-0 opacity-0 w-0 h-0 pointer-events-none"
               />
-              <div className="w-full px-4 py-2 bg-white dark:bg-[#1a1c23] border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white flex items-center justify-between gap-3 transition-all cursor-pointer">
-                <span className="font-medium">{endDate.split('-').reverse().join('/')}</span>
-                <Calendar className="w-4 h-4 text-gray-400 shrink-0" />
-              </div>
+              <span className="font-medium text-[13px] sm:text-sm">{endDate.split('-').reverse().join('/')}</span>
+              <Calendar className="w-4 h-4 text-gray-400 group-hover:text-blue-500 shrink-0 transition-colors" />
             </div>
           </div>
         </div>
