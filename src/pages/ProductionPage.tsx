@@ -25,12 +25,18 @@ export function ProductionPage() {
   const dateInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    loadProduction();
-    loadProgrammingPlan();
-  }, [selectedDate, selectedSector, selectedShift]);
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([
+        loadProduction(),
+        loadProgrammingPlan()
+      ]);
+      setLoading(false);
+    };
+    loadData();
+  }, [selectedDate, selectedShift]);
 
   const loadProduction = async () => {
-    setLoading(true);
     try {
       // Verificar si hay historial para este turno específico
       const { data: histExists } = await supabase
@@ -79,7 +85,6 @@ export function ProductionPage() {
         .from('programming')
         .select('*')
         .eq('date', selectedDate)
-        .eq('sector', selectedSector)
         .eq('shift_type', selectedShift);
 
       const { data, error } = await (query as any);
@@ -107,19 +112,28 @@ export function ProductionPage() {
   const saveProduction = async () => {
     setSaving(true);
     try {
-      // Guardar cambios en la tabla production
-      for (const p of production) {
-        await (supabase
-          .from('production') as any)
-          .update({ produced: p.produced })
-          .eq('id', p.id);
-      }
+      // Guardar cambios masivos en la tabla production de forma atómica
+      const dataToSave = production.map(p => ({
+        id: p.id,
+        date: p.date,
+        sector: p.sector,
+        product: p.product,
+        shift_type: p.shift_type,
+        planned: p.planned,
+        produced: Number.isFinite(p.produced) ? p.produced : 0,
+      }));
+
+      const { error } = await (supabase
+        .from('production') as any)
+        .upsert(dataToSave);
+
+      if (error) throw error;
       
-      showMessage('success', 'Avance de producción guardado');
+      showMessage('success', 'Avance guardado (Turno aún abierto)');
       await loadProduction();
     } catch (error) {
       console.error('Error saving production:', error);
-      showMessage('error', 'Error al guardar la producción');
+      showMessage('error', 'Error al guardar el avance');
     } finally {
       setSaving(false);
     }

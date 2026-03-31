@@ -303,68 +303,65 @@ export function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Plan Total</p>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                <CountUpNumber end={totalPlanned} />
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">bandejas</p>
-            </div>
+        <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300 relative overflow-hidden">
+          <div className="mb-4">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Plan Total</p>
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+              <CountUpNumber end={totalPlanned} />
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">bandejas</p>
+          </div>
+          <div className="absolute bottom-6 right-6">
             <CircularProgress percentage={totalPlanned > 0 ? 100 : 0} color="blue" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
-                Producción Total
-                <span className="text-[10px] bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider transition-all duration-300">Bandejas</span>
-              </p>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                <CountUpNumber end={totalProduced} />
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">bandejas</p>
-            </div>
+        <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300 relative overflow-hidden">
+          <div className="mb-4">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400 flex items-center justify-between w-full">
+              Producción Total
+              <span className="text-[10px] bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider transition-all duration-300">Bandejas</span>
+            </p>
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+              <CountUpNumber end={totalProduced} />
+            </h3>
+          </div>
+          <div className="absolute bottom-6 right-6">
             <CircularProgress percentage={compliance} color="green" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">P. Salsas</p>
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                <CountUpNumber end={salsasUnits} />
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">unidades</p>
-            </div>
+        <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300 relative overflow-hidden">
+          <div className="mb-4">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Producción Salsas</p>
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+              <CountUpNumber end={salsasUnits} />
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">unidades</p>
+          </div>
+          <div className="absolute bottom-6 right-6">
             <CircularProgress percentage={salsasUnits > 0 ? 100 : 0} color="amber" />
           </div>
         </div>
 
-        <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300">
-          <div className="flex items-center justify-between mb-4">
-            <div className="space-y-2">
-              <div>
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Cumplimiento</p>
-                <h3 className={`text-2xl font-black mt-1 ${compliance >= 100 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                  <CountUpNumber end={compliance} decimals={1} suffix="%" />
-                </h3>
-              </div>
-              <div className="pt-2 border-t border-gray-100 dark:border-white/5">
-                <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Diferencia</p>
-                <h3 className={`text-xl font-bold mt-1 ${difference >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                  <CountUpNumber end={difference} prefix={difference >= 0 ? '+' : ''} />
-                  <span className="text-xs ml-1 font-medium">bandejas</span>
-                </h3>
-              </div>
+        <div className="bg-white dark:bg-[#1a1c23] rounded-2xl shadow-sm border border-gray-200 dark:border-white/5 p-6 transition-all duration-300 relative overflow-hidden">
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Cumplimiento</p>
+              <h3 className={`text-2xl font-black mt-1 ${compliance >= 100 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                <CountUpNumber end={compliance} decimals={1} suffix="%" />
+              </h3>
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <CircularProgress percentage={compliance} color={compliance >= 100 ? 'green' : 'red'} />
+            <div className="pt-2 border-t border-gray-100 dark:border-white/5">
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Diferencia</p>
+              <h3 className={`text-xl font-bold mt-1 ${difference >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                <CountUpNumber end={difference} prefix={difference >= 0 ? '+' : ''} />
+                <span className="text-xs ml-1 font-medium">bandejas</span>
+              </h3>
             </div>
+          </div>
+          <div className="absolute bottom-6 right-6">
+            <CircularProgress percentage={compliance} color={compliance >= 100 ? 'green' : 'red'} />
           </div>
         </div>
       </div>
